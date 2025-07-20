@@ -315,10 +315,10 @@
         function showVideos(catId) {
           const cat = categories.find(c => c.id === catId);
           const vids = videos.filter(v => getCategoryFromTitle(v.title) === catId);
-          main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 카테고리로 돌아가기</button><h2 style='text-align:center;'>${cat.label} 동영상</h2><div class='videos'>${vids.map(v => `<div class='video-card' onclick='showVideo("${v.id}", "${v.title.replace(/"/g, '&quot;')}")'><img class='video-thumb' src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'><div class='video-title'>${v.title}</div></div>`).join('')}</div>`;
+          main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 전체보기</button><h2 style='text-align:center;'>${cat.label} 동영상</h2><div class='videos'>${vids.map(v => `<div class='video-card' onclick='showVideo("${v.id}", "${v.title.replace(/"/g, '&quot;')}")'><img class='video-thumb' src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'><div class='video-title'>${v.title}</div></div>`).join('')}</div>`;
         }
         function showVideo(vid, title) {
-          main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 카테고리로 돌아가기</button><h2 style='text-align:center;'>${title}</h2><div style='display:flex;justify-content:center;'><iframe width='100%' height='220' src='https://www.youtube.com/embed/${vid}' frameborder='0' allowfullscreen></iframe></div>`;
+          main.innerHTML = `<button class='back-btn' style='font-size:1.3rem;'onclick='showCategories()'>&larr; 전체보기</button><h2 style='text-align:center;'>${title}</h2><div style='display:flex;justify-content:center;'><iframe width='100%' height='220' src='https://www.youtube.com/embed/${vid}' frameborder='0' allowfullscreen></iframe></div>`;
         }
         showCategories();
     </script>
