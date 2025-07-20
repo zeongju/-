@@ -165,6 +165,18 @@
             main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 카테고리로 돌아가기</button><h2 style='text-align:center;'>${title}</h2><div style='display:flex;justify-content:center;'><iframe width='100%' height='220' src='https://www.youtube.com/embed/${vid}' frameborder='0' allowfullscreen></iframe></div>`;
         }
         showCategories();
+        const recent = videos[videos.length - 1];
+            main.innerHTML = `
+                <div style='margin-bottom:24px;'>
+                    <h2 style='font-size:1.2rem;text-align:center;color:#1976d2;'>최근 동영상</h2>
+                    <div class='video-card' style='max-width:400px;margin:0 auto;' onclick='showVideo("${recent.id}", "${recent.title.replace(/"/g, '&quot;')}")'>
+                        <img class='video-thumb' src='https://img.youtube.com/vi/${recent.id}/mqdefault.jpg'>
+                        <div class='video-title'>${recent.title}</div>
+                    </div>
+                </div>
+                <div class='categories'>${categories.map(cat => `<button class='category-btn' onclick='showVideos(${cat.id})'>${cat.label}</button>`).join('')}</div>
+            `;
+        }
     </script>
 </body>
 </html>
