@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,22 +11,27 @@
             margin: 0;
             background: #f8f9fa;
         }
+        
         .container {
             max-width: 480px;
             margin: 0 auto;
             padding: 16px;
         }
+        
         h1 {
             font-size: 1.5rem;
             text-align: center;
             margin-bottom: 1.5rem;
         }
-        .categories, .videos {
+        
+        .categories,
+        .videos {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             justify-content: center;
         }
+        
         .category-btn {
             flex: 1 1 40%;
             min-width: 120px;
@@ -38,9 +44,11 @@
             cursor: pointer;
             transition: background 0.2s;
         }
+        
         .category-btn:hover {
             background: #1565c0;
         }
+        
         .video-card {
             background: #fff;
             border-radius: 8px;
@@ -51,6 +59,7 @@
             align-items: center;
             cursor: pointer;
         }
+        
         .video-thumb {
             width: 90px;
             height: 60px;
@@ -58,10 +67,12 @@
             object-fit: cover;
             margin-right: 12px;
         }
+        
         .video-title {
             font-size: 1rem;
             color: #222;
         }
+        
         .back-btn {
             margin: 16px 0;
             background: #eee;
@@ -72,77 +83,211 @@
             font-size: 1rem;
             cursor: pointer;
         }
+        
         @media (max-width: 600px) {
-            .container { padding: 6px; }
-            .category-btn { min-width: 90px; font-size: 1rem; padding: 12px 0; }
+            .container {
+                padding: 6px;
+            }
+            .category-btn {
+                min-width: 90px;
+                font-size: 1rem;
+                padding: 12px 0;
+            }
         }
     </style>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="shortcut icon" href="favicon.ico">
 </head>
+
 <body>
     <div class="container">
+        <div style="position:fixed;top:16px;right:16px;z-index:1000;">
+            <button onclick="installPWA()" style="font-size:1.3rem;padding:12px 24px;background:#1976d2;color:#fff;border:none;border-radius:12px;box-shadow:0 2px 8px #0002;cursor:pointer;">앱설치</button>
+        </div>
         <h1>화타의 진료실<br>예산 종합 병원</h1>
         <div id="main"></div>
     </div>
     <script>
-        const categories = [
-            { id: 1, label: '목' },
-            { id: 2, label: '허리' },
-            { id: 3, label: '어깨' },
-            { id: 4, label: '팔꿈치' },
-            { id: 5, label: '손/손목' },
-            { id: 6, label: '엉덩이/고관절' },
-            { id: 7, label: '무릎' },
-            { id: 8, label: '발목/발' },
-            { id: 9, label: '일반의학' }
-        ];
+        // PWA 설치 안내
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
 
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('앱설치 버튼이 보이지 않으면, 브라우저 메뉴에서 "홈 화면에 추가" 또는 "앱 설치"를 이용하세요.');
+            }
+        }
+        const categories = [{
+            id: 1,
+            label: '목'
+        }, {
+            id: 2,
+            label: '허리'
+        }, {
+            id: 3,
+            label: '어깨'
+        }, {
+            id: 4,
+            label: '팔꿈치'
+        }, {
+            id: 5,
+            label: '손/손목'
+        }, {
+            id: 6,
+            label: '엉덩이/고관절'
+        }, {
+            id: 7,
+            label: '무릎'
+        }, {
+            id: 8,
+            label: '발목/발'
+        }, {
+            id: 9,
+            label: '일반의학'
+        }];
         // 동영상 데이터: id와 실제 제목만 입력하면 됨 (카테고리는 자동 분류)
-        const videos = [
-          { id: '3mmjM77W8XQ', title: '3 어깨 석회성 건염, 치료법, 초음파충격치료' },
-          { id: '-Y6gSzI3q1M', title: '2 척추협착증, 척추 전방 전위증 운동치료, 수술시기' },
-          { id: 'M8QaRRqHptw', title: '8 발등뼈 골절,  수술,  멍,  재활' },
-          { id: 'M0QthvChe30', title: '5 손등뼈 골절 수술할까 후유증,' },
-          { id: '-sZKMhpFx2E', title: '4 테니스 엘보, 골프 엘보, 인대증식주사, 초음파 충격 치료, 잘못된 치료' },
-          { id: '9bMMhPYdjHg', title: '1 목 디스크와 베게와 운동' },
-          { id: 'tD6lN2bwG8I', title: '3 어깨 골절후 6주, 후유증, 석회성 건염, 오십견' },
-          { id: 'Lnbze-N6EKQ', title: '8 아킬레스건염, 아킬레스건 파열, 도수치료, 인대증식주사, 초음파충격치료' },
-          { id: 'XDMdj4JowL4', title: '7 무릎관절염, x ray 서서찍어야 하는 이유' },
-          { id: 'lf8EMy4DHUw', title: '7고관절 골절, 무릎 관절염 아버지가 걱정스러운 가족' },
-          { id: 'y9UW3wwZK5U', title: '1 후종인대골화증, 전립선, 담낭 결석, 운동' },
-          { id: '-xi9jjG-sjo', title: '6 대퇴골 경부 골절 유합후 금속제거할까말까, 무혈성 괴사' },
-          { id: 'x9PXhzXtS1s', title: '8 뼈도 다붙었는데 왜 다리가 아파  금속 알레르기 예산종합병원 화타의 진료실' },
-          { id: 'I8XCaTUN73M', title: '5 손가락 인대 파열의 진단과 치료 예산종합병원 화타의 진료실' },
-          { id: 'Q5CJG51-8rI', title: '6  천장관절염  좌골 신경통 같은데 디스크 협착증은 아니고' },
-          { id: 'yOlvb1dmWGc', title: '9 갈비뼈 골절: 엄마 갈비를 부러뜨린 딸의 죄책감과 초음파 vs CT' },
-          { id: 'x0t7YMtcq7o', title: '6 고관절 골절 할머니의 불만. 재활, 통증, 보행' },
-          { id: 'MFi4_rOOnss', title: '2 요통, 이유 없이 허리 아파서 병원만 열심히 다녀  협착증, 디스크 라면서 약만 준다' },
-          { id: 'Xb9AaBQ0o-g', title: '9 치매 검사' },
-          { id: 'Vnsrf9vd4Ek', title: '1 목에 혹' },
-          { id: 'awBY7bq1SgY', title: '2. 척추측만증, 협착증,하지부동   허리 아픈 원인- 다리 길이가 달라서' },
-          { id: 'QYJlg6mFE24', title: '9 교통사고환자는 억울해, 팔꿈치, 무릎 통증  교통사고환자의 치료과 보상' },
-          { id: 'K9nxaE29psw', title: '5 손목 골절 합병증, 재활 과 운동' },
-          { id: 'lgUBVZ_ALHU', title: '4. 테니스 엘보 혹은 외상과염 , 해야 할 치료와 하면 안되는 치료' },
-          { id: 'GinWPXSWHCs', title: '2 허리 척추 협착증 수술할까 주사나 시술 할까' },
-          { id: 'y7SrFK6M9CQ', title: '3. 어깨 통증과 회전근 파열과 탁구와 파킨슨병' },
-          { id: 'lZKVNk3xC_E', title: '3. 오십견, 충돌 증후군, 회전근 부분 파열  당일 치료' },
-          { id: 'ei4M_YC0gs4', title: '7 무릎 물혹, 팔꿈치 물혹' },
-          { id: '5TSnTkolbV4', title: '7 무릎 연골 파열과 연골 기형' },
-          { id: 'cvx6K7i3Igc', title: '7 무릎 관절염, 수술하기엔 너무 젊어, 퇴행성 관절염' },
-          { id: 'h9B08M_44Ek', title: '2 척추압박골절, 시멘트 시술' },
-          { id: 'rLw3mwre7K0', title: '2 척추압박골절, 심하지 않아' },
-          { id: 'qFT1f36h6wA', title: '4 척골신경마비, 팔꿈치 터널 증후군 손저림, 손힘빠짐' },
-          { id: '0YTglEmCw_E', title: '8 발바닥 통증,족저근막염' },
-          { id: 'Fw8j9uUP4B8', title: '7 무릎 관절염 .오다리교정수술후 더 아파요' },
-          { id: 'cpLJ4JIUC_M', title: '6 고관절 무혈성 괴사, 초기' },
-          { id: 'E2FEPB-Furo', title: '9 암웨이와 건강 기능 식품 또는 건강 보조 식품과 약' },
-          { id: 'iSIbitkKIC0', title: '2  승모근 통증 -목 디스크 일까 ?' },
-          { id: 'CV4X57yA02w', title: '5 방아쇠 손가락, 방아쇠 수지' },
-          { id: 'AVcFuhdHaAg', title: '9 친한 환자의 우울증' },
-          { id: 'Zq7mLgv2cms', title: '3 어깨 회전근 파열 수술' },
-          { id: 'X7JY5-iHHtU', title: '2 척추협착증, 디스크 초기 치료' },
-          { id: 'suMEuf6cQA8', title: '2 허리근육통 -협착증인가 ? 디스크 인가?  아니요 근육통이예요' },
-          { id: 'T7v0sIMAJyU', title: '9한약과 양약의 차이' }
-        ];
+        const videos = [{
+            id: '3mmjM77W8XQ',
+            title: '3 어깨 석회성 건염, 치료법, 초음파충격치료'
+        }, {
+            id: '-Y6gSzI3q1M',
+            title: '2 척추협착증, 척추 전방 전위증 운동치료, 수술시기'
+        }, {
+            id: 'M8QaRRqHptw',
+            title: '8 발등뼈 골절,  수술,  멍,  재활'
+        }, {
+            id: 'M0QthvChe30',
+            title: '5 손등뼈 골절 수술할까 후유증,'
+        }, {
+            id: '-sZKMhpFx2E',
+            title: '4 테니스 엘보, 골프 엘보, 인대증식주사, 초음파 충격 치료, 잘못된 치료'
+        }, {
+            id: '9bMMhPYdjHg',
+            title: '1 목 디스크와 베게와 운동'
+        }, {
+            id: 'tD6lN2bwG8I',
+            title: '3 어깨 골절후 6주, 후유증, 석회성 건염, 오십견'
+        }, {
+            id: 'Lnbze-N6EKQ',
+            title: '8 아킬레스건염, 아킬레스건 파열, 도수치료, 인대증식주사, 초음파충격치료'
+        }, {
+            id: 'XDMdj4JowL4',
+            title: '7 무릎관절염, x ray 서서찍어야 하는 이유'
+        }, {
+            id: 'lf8EMy4DHUw',
+            title: '7고관절 골절, 무릎 관절염 아버지가 걱정스러운 가족'
+        }, {
+            id: 'y9UW3wwZK5U',
+            title: '1 후종인대골화증, 전립선, 담낭 결석, 운동'
+        }, {
+            id: '-xi9jjG-sjo',
+            title: '6 대퇴골 경부 골절 유합후 금속제거할까말까, 무혈성 괴사'
+        }, {
+            id: 'x9PXhzXtS1s',
+            title: '8 뼈도 다붙었는데 왜 다리가 아파  금속 알레르기 예산종합병원 화타의 진료실'
+        }, {
+            id: 'I8XCaTUN73M',
+            title: '5 손가락 인대 파열의 진단과 치료 예산종합병원 화타의 진료실'
+        }, {
+            id: 'Q5CJG51-8rI',
+            title: '6  천장관절염  좌골 신경통 같은데 디스크 협착증은 아니고'
+        }, {
+            id: 'yOlvb1dmWGc',
+            title: '9 갈비뼈 골절: 엄마 갈비를 부러뜨린 딸의 죄책감과 초음파 vs CT'
+        }, {
+            id: 'x0t7YMtcq7o',
+            title: '6 고관절 골절 할머니의 불만. 재활, 통증, 보행'
+        }, {
+            id: 'MFi4_rOOnss',
+            title: '2 요통, 이유 없이 허리 아파서 병원만 열심히 다녀  협착증, 디스크 라면서 약만 준다'
+        }, {
+            id: 'Xb9AaBQ0o-g',
+            title: '9 치매 검사'
+        }, {
+            id: 'Vnsrf9vd4Ek',
+            title: '1 목에 혹'
+        }, {
+            id: 'awBY7bq1SgY',
+            title: '2. 척추측만증, 협착증,하지부동   허리 아픈 원인- 다리 길이가 달라서'
+        }, {
+            id: 'QYJlg6mFE24',
+            title: '9 교통사고환자는 억울해, 팔꿈치, 무릎 통증  교통사고환자의 치료과 보상'
+        }, {
+            id: 'K9nxaE29psw',
+            title: '5 손목 골절 합병증, 재활 과 운동'
+        }, {
+            id: 'lgUBVZ_ALHU',
+            title: '4. 테니스 엘보 혹은 외상과염 , 해야 할 치료와 하면 안되는 치료'
+        }, {
+            id: 'GinWPXSWHCs',
+            title: '2 허리 척추 협착증 수술할까 주사나 시술 할까'
+        }, {
+            id: 'y7SrFK6M9CQ',
+            title: '3. 어깨 통증과 회전근 파열과 탁구와 파킨슨병'
+        }, {
+            id: 'lZKVNk3xC_E',
+            title: '3. 오십견, 충돌 증후군, 회전근 부분 파열  당일 치료'
+        }, {
+            id: 'ei4M_YC0gs4',
+            title: '7 무릎 물혹, 팔꿈치 물혹'
+        }, {
+            id: '5TSnTkolbV4',
+            title: '7 무릎 연골 파열과 연골 기형'
+        }, {
+            id: 'cvx6K7i3Igc',
+            title: '7 무릎 관절염, 수술하기엔 너무 젊어, 퇴행성 관절염'
+        }, {
+            id: 'h9B08M_44Ek',
+            title: '2 척추압박골절, 시멘트 시술'
+        }, {
+            id: 'rLw3mwre7K0',
+            title: '2 척추압박골절, 심하지 않아'
+        }, {
+            id: 'qFT1f36h6wA',
+            title: '4 척골신경마비, 팔꿈치 터널 증후군 손저림, 손힘빠짐'
+        }, {
+            id: '0YTglEmCw_E',
+            title: '8 발바닥 통증,족저근막염'
+        }, {
+            id: 'Fw8j9uUP4B8',
+            title: '7 무릎 관절염 .오다리교정수술후 더 아파요'
+        }, {
+            id: 'cpLJ4JIUC_M',
+            title: '6 고관절 무혈성 괴사, 초기'
+        }, {
+            id: 'E2FEPB-Furo',
+            title: '9 암웨이와 건강 기능 식품 또는 건강 보조 식품과 약'
+        }, {
+            id: 'iSIbitkKIC0',
+            title: '2  승모근 통증 -목 디스크 일까 ?'
+        }, {
+            id: 'CV4X57yA02w',
+            title: '5 방아쇠 손가락, 방아쇠 수지'
+        }, {
+            id: 'AVcFuhdHaAg',
+            title: '9 친한 환자의 우울증'
+        }, {
+            id: 'Zq7mLgv2cms',
+            title: '3 어깨 회전근 파열 수술'
+        }, {
+            id: 'X7JY5-iHHtU',
+            title: '2 척추협착증, 디스크 초기 치료'
+        }, {
+            id: 'suMEuf6cQA8',
+            title: '2 허리근육통 -협착증인가 ? 디스크 인가?  아니요 근육통이예요'
+        }, {
+            id: 'T7v0sIMAJyU',
+            title: '9한약과 양약의 차이'
+        }];
 
         // 제목의 첫 숫자를 기준으로 카테고리 자동 분류
         function getCategoryFromTitle(title) {
@@ -154,18 +299,8 @@
         const main = document.getElementById('main');
 
         function showCategories() {
-            main.innerHTML = `<div class='categories'>${categories.map(cat => `<button class='category-btn' onclick='showVideos(${cat.id})'>${cat.label}</button>`).join('')}</div>`;
-        }
-        function showVideos(catId) {
-            const cat = categories.find(c => c.id === catId);
-            const vids = videos.filter(v => getCategoryFromTitle(v.title) === catId);
-            main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 카테고리로 돌아가기</button><h2 style='text-align:center;'>${cat.label} 동영상</h2><div class='videos'>${vids.map(v => `<div class='video-card' onclick='showVideo(\"${v.id}\", \"${v.title.replace(/\"/g, '&quot;')}\")'><img class='video-thumb' src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'><div class='video-title'>${v.title}</div></div>`).join('')}</div>`;
-        }
-        function showVideo(vid, title) {
-            main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 카테고리로 돌아가기</button><h2 style='text-align:center;'>${title}</h2><div style='display:flex;justify-content:center;'><iframe width='100%' height='220' src='https://www.youtube.com/embed/${vid}' frameborder='0' allowfullscreen></iframe></div>`;
-        }
-        showCategories();
-        const recent = videos[videos.length - 1];
+            // 최신 동영상(가장 마지막에 추가된 영상)
+            const recent = videos[videos.length - 1];
             main.innerHTML = `
                 <div style='margin-bottom:24px;'>
                     <h2 style='font-size:1.2rem;text-align:center;color:#1976d2;'>최근 동영상</h2>
@@ -177,6 +312,16 @@
                 <div class='categories'>${categories.map(cat => `<button class='category-btn' onclick='showVideos(${cat.id})'>${cat.label}</button>`).join('')}</div>
             `;
         }
+        function showVideos(catId) {
+          const cat = categories.find(c => c.id === catId);
+          const vids = videos.filter(v => getCategoryFromTitle(v.title) === catId);
+          main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 카테고리로 돌아가기</button><h2 style='text-align:center;'>${cat.label} 동영상</h2><div class='videos'>${vids.map(v => `<div class='video-card' onclick='showVideo("${v.id}", "${v.title.replace(/"/g, '&quot;')}")'><img class='video-thumb' src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'><div class='video-title'>${v.title}</div></div>`).join('')}</div>`;
+        }
+        function showVideo(vid, title) {
+          main.innerHTML = `<button class='back-btn' onclick='showCategories()'>&larr; 카테고리로 돌아가기</button><h2 style='text-align:center;'>${title}</h2><div style='display:flex;justify-content:center;'><iframe width='100%' height='220' src='https://www.youtube.com/embed/${vid}' frameborder='0' allowfullscreen></iframe></div>`;
+        }
+        showCategories();
     </script>
 </body>
+
 </html>
